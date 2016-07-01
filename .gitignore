@@ -14,8 +14,6 @@
 .libs
 .deps
 hyper_graph_test
-hyper_col_test
-multi_index_test
 compile
 Makefile
 Makefile.in
