@@ -3,7 +3,7 @@
 #include "hyper_edge.hpp"
 
 namespace HyperColPack {
-
+/*
 void SymmetricPartition(HyperGraph& G) {
   std::cout << "in Symmetric Partition" << std::endl;
 
@@ -59,5 +59,5 @@ void SymmetricPartition(HyperGraph& G) {
   }
  
 }
-
+*/
 } // HyperColPack

@@ -1,16 +1,17 @@
 #include "hyper_graph.hpp"
-#include "hypercol.hpp"
+#include "hyper_symmetric_partition.hpp"
 
-using HyperColPack::MultiIndex;
+using HyperColPack::MultiIndexSet;
 using HyperColPack::HyperGraph;
+using HyperColPack::HyperSymmetricPartition;
 
 void add_edge(HyperGraph& hg, int v1, int v2) {
-  MultiIndex mi;
+  MultiIndexSet mi;
   mi.insert(v1).insert(v2);
   hg.add_edge(mi);
 }
 void add_edge(HyperGraph& hg, int v1, int v2, int v3) {
-  MultiIndex mi;
+  MultiIndexSet mi;
   mi.insert(v1).insert(v2).insert(v3);
   hg.add_edge(mi);
 }
@@ -57,8 +58,9 @@ HyperGraph get_third_diagonal_graph(int n) {
   return hg;
 }
 int main() {
-  //HyperGraph hg = get_hessian_graph();
-  HyperGraph hg = get_third_diagonal_graph(5);
-  SymmetricPartition(hg);
-  hg.dump();
+  HyperGraph hg = get_hessian_graph();
+  //HyperGraph hg = get_third_diagonal_graph(5);
+  HyperSymmetricPartition sp(hg);
+  sp.try_coloring();
+  sp.dump();
 }

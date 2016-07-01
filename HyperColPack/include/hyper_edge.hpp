@@ -1,44 +1,47 @@
 #ifndef HYPERCOLPACK_HYPER_EDGE_H_
 #define HYPERCOLPACK_HYPER_EDGE_H_
 
-#include "multi_index.hpp"
+#include "multi_index_set.hpp"
 
 namespace HyperColPack {
 
+class HyperGraph;
+
 class HyperEdge {
  public:
-  HyperEdge(int id, const MultiIndex& multi_index) {
-    _edge_id = id;
-    _adjacent_index = multi_index;
-    curr_recovery_index = -1;
-    curr_recovery_location = -1;
-    for (int i = 0; i < multi_index.size(); i++) {
-      checked[i] = false;
-    }
-  }
+  // The default constructor is deleted, so the ONLY way you can construct
+  // a HyperEdge is via HyperGraph.add_edge();
+  HyperEdge() = delete;
 
   bool operator < (const HyperEdge& rhs) const {
-    return this->_adjacent_index < rhs._adjacent_index;
+    return this->_v_index_set < rhs._v_index_set;
   }
-
-  MultiIndex get_quotient_index() const {
-    MultiIndex ret = _adjacent_index;
+/*
+  MultiIndexSet get_quotient_index() const {
+    MultiIndexSet ret = _adjacent_index;
     if (curr_recovery_index != -1) {
       ret.remove(curr_recovery_index);
     }
     return ret;
   }
 
-  MultiIndex get_quotient_index(int v) const {
-    MultiIndex ret = _adjacent_index;
+  MultiIndexSet get_quotient_index(int v) const {
+    MultiIndexSet ret = _adjacent_index;
     ret.remove(v);
     return ret;
   }
-
-  MultiIndex get_index() {
-    return _adjacent_index;
+*/
+  int get_degree() const {
+    return _degree;
   }
-  
+  MultiIndexSet get_v_index_set() {
+    return _v_index_set;
+  }
+
+  int get_v_index(int index) {
+    return _v_index_set.get(index);
+  } 
+/* 
   void set_recover_index(int v) {
     curr_recovery_index = v;
     curr_recovery_location = _adjacent_index.find(v);
@@ -52,11 +55,11 @@ class HyperEdge {
   int get_recover_location() const {
     return curr_recovery_location;
   }
-
-  bool adjacent_to(int index) const {
-    return _adjacent_index.contains(index);
+*/
+  bool adjacent_to(int v) const {
+    return _v_index_set.contains(v);
   }
-
+/*
   int get_edge_id() const {
     return _edge_id;
   }
@@ -69,20 +72,28 @@ class HyperEdge {
   void set_checked(int index) {
     checked[index] = true;
   }
+*/
   void dump() const {
-    std::cout << "Edge["<<_edge_id<<"] : <" << curr_recovery_index << "> ";
-    _adjacent_index.dump();
+    std::cout << "Edge["<<_edge_id<<"] : ";
+    _v_index_set.dump();
+    //std::cout << std::endl;
   }
   
 
  private:
+  // Private constructor that will be called by HyperGraph.add_edge();
+  HyperEdge(int id, const MultiIndexSet& multi_index) {
+    _edge_id = id;
+    _degree = multi_index.size();
+    _v_index_set = multi_index;
+  }
+
   // degree and adjacent vertices
   int _edge_id;
-  MultiIndex _adjacent_index;
-
-  int curr_recovery_index;
-  int curr_recovery_location;
-  bool checked[10];
+  int _degree;
+  MultiIndexSet _v_index_set;
+  
+  friend class HyperGraph;
 };
 
 } // namespace HyperColPack
