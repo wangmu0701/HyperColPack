@@ -58,9 +58,10 @@ HyperGraph get_third_diagonal_graph(int n) {
   return hg;
 }
 int main() {
-  HyperGraph hg = get_hessian_graph();
-  //HyperGraph hg = get_third_diagonal_graph(5);
+  //HyperGraph hg = get_hessian_graph();
+  HyperGraph hg = get_third_diagonal_graph(10);
   HyperSymmetricPartition sp(hg);
   sp.try_coloring();
   sp.dump();
+  sp.check();
 }

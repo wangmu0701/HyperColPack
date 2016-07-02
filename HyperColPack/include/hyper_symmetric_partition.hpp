@@ -37,7 +37,10 @@ class HyperSymmetricPartition {
   // can we find another colored vertex that make e recoverable?
   // If yes, use that vertex to recover e, so we can resolve some conflicts
   bool try_another_recover_v(std::shared_ptr<HyperEdge> e, int v);
-  void dump() const;  
+
+  // utilities
+  void dump() const;
+  bool check() const;
  private:
   // number of colored vertices
   int _colored_v_num;
@@ -47,6 +50,7 @@ class HyperSymmetricPartition {
 
   // all unrecovered_edges;
   std::set<std::shared_ptr<HyperEdge>> _unrecovered_edges;
+  std::set<std::shared_ptr<HyperEdge>> _all_edges;
   
   // color[v];
   std::vector<int> v_colors;

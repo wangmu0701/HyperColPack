@@ -6,6 +6,7 @@ HyperSymmetricPartition::HyperSymmetricPartition(const HyperGraph& g) {
   v_colors.resize(g._n, -1);
   for (std::shared_ptr<HyperEdge> edge : g._edge_vec) {
     _unrecovered_edges.insert(edge);
+    _all_edges.insert(edge);
     for (int i = 0; i < edge->get_degree(); i++) {
       int v = edge->get_v_index(i);
       if (_adjacent_edges[v].find(edge) == _adjacent_edges[v].end()) {
@@ -32,18 +33,19 @@ void HyperSymmetricPartition::try_coloring() {
       //edge->dump();
       //std::cout << std::endl;
       for (int c = 0; c < curr_colors; c++) {
-        //std::cout << "checking color : " << c << std::endl;
+        //std::cout << "checking color : " << c;
         if (valid_colors[c] == 0) {
           // first check if color v as c will cause conflict;
           if (!check_conflict(edge, v, c)) {
             valid_colors[c] = -1;
-            break;
+            //std::cout << " invalid" << std::endl;
+            continue;
           }
           if (_unrecovered_edges.find(edge) != _unrecovered_edges.end()) {
             // edge is still unrecoverable, check if it's recoverable under v#c
             if (!check_recoverable(edge, v, c)) {
               valid_colors[c] = -1;
-              break;
+              //std::cout << " invalid" << std::endl;
             }
           }
         }
@@ -98,6 +100,7 @@ bool HyperSymmetricPartition::check_conflict(
     return try_another_recover_v(f_iter->second,
                                  _recovery_index[f_iter->second]);
   }
+  //std::cout << "TRUE" << std::endl;
   return true;
 }
 
@@ -117,6 +120,10 @@ bool HyperSymmetricPartition::try_another_recover_v(
               std::make_pair(e_index_set, e));
           e_index_set.insert(v_alt).remove(v);
           _recover_index_set[v_colors[v]].erase(e_index_set); 
+          //std::cout << "alter edge : ";
+          //e->dump();
+          //std::cout << "from " << v << " to " << v_alt << std::endl;
+          //this->dump();
           return true;
         }
       }
@@ -141,7 +148,16 @@ void HyperSymmetricPartition::dump() const {
   for (int i = 0; i < v_colors.size(); i++) {
     std::cout << "color["<<i<<"] = " << v_colors[i] << std::endl;
   }
-  std::cout << "On Each Slice" << std::endl;
+  std::cout << "On Each Recovery Slice" << std::endl;
+  for (auto kv : _recover_index_set) {
+    std::cout << "On slice " << kv.first << "  :  "<< std::endl;
+    for (auto kv2 : kv.second) {
+      std::cout << "    ";
+      kv2.first.dump();
+      std::cout << std::endl;
+    }
+  }
+  std::cout << "On Each Compressed Slice" << std::endl;
   for (auto kv : _compressed_index_set) {
     std::cout << "On slice " << kv.first << " : " << std::endl;
     for (const MultiIndexSet& index_set : kv.second) {
@@ -150,6 +166,47 @@ void HyperSymmetricPartition::dump() const {
       std::cout << std::endl;
     }
   }
+}
+
+bool HyperSymmetricPartition::check() const {
+  std::map<int, std::map<MultiIndexSet, int>> _check_count;
+  if (_unrecovered_edges.size() != 0) {
+    std::cout << "Check Fail!!! Still unrecovered edges remains!" << std::endl;
+    return false;
+  }
+  for (std::shared_ptr<HyperEdge> edge : _all_edges) {
+    int d = edge->get_degree();
+    MultiIndexSet edge_index_set = edge->get_v_index_set();
+    int prev_v = -1;
+    for (int i = 0; i < d; i++) {
+      int v = edge->get_v_index(i);
+      if (v != prev_v) {
+        edge_index_set.remove(v);
+        _check_count[v_colors[v]][edge_index_set]++;
+        //edge_index_set.dump();
+        //std::cout << std::endl;
+        edge_index_set.insert(v);
+        prev_v = v;
+      }
+    }
+  }
+  for (std::shared_ptr<HyperEdge> edge : _all_edges) {
+    int r = _recovery_index.at(edge);
+    MultiIndexSet r_index_set = edge->get_v_index_set();
+    r_index_set.remove(r);
+    if (_check_count[v_colors[r]][r_index_set] != 1) {
+      std::cout << "Check Fail!!! Unrecoverable for edge :";
+      edge->dump();
+      std::cout << " on R{" << r << "}" << std::endl;
+      std::cout << "color = " << v_colors[r] << " R index = ";
+      r_index_set.dump();
+      std::cout << std::endl;
+      std::cout << "count = " << _check_count[v_colors[r]][r_index_set] << std::endl;
+      return false;
+    }
+  }
+  std::cout << "Check success!"<< std::endl;
+  return true;
 }
 
 } // namespace HyperColPack
