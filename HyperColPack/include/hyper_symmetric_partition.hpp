@@ -39,11 +39,14 @@ class HyperSymmetricPartition {
   bool try_another_recover_v(std::shared_ptr<HyperEdge> e, int v);
 
   // utilities
+  int get_num_of_colors() const {return _num_of_colors;}
   void dump() const;
   bool check() const;
  private:
   // number of colored vertices
   int _colored_v_num;
+
+  int _num_of_colors;
 
   // map v -> adjacent edges
   std::map<int, std::set<std::shared_ptr<HyperEdge>>> _adjacent_edges;
@@ -57,6 +60,9 @@ class HyperSymmetricPartition {
 
   // number of attempts that this edge have tried for an alternative recover
   std::map<std::shared_ptr<HyperEdge>, int> _alternative_attempts;
+
+  // this is tricky, otherwise there will be a bug
+  std::set<std::shared_ptr<HyperEdge>> _alternative_edge_set;
 
   // map HyperEdge -> recovery index
   std::map<std::shared_ptr<HyperEdge>, int> _recovery_index;

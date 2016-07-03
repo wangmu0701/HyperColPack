@@ -15,48 +15,60 @@ HyperSymmetricPartition::HyperSymmetricPartition(const HyperGraph& g) {
     }
   }
   _colored_v_num = 0;
+  _num_of_colors = 0;
 }
 
 void HyperSymmetricPartition::try_coloring() {
-  std::cout << "I'm trying to color : " << v_colors.size() << std::endl;
-  int* valid_colors = new int[v_colors.size()];
-  int curr_colors = 0;
+  if (_num_of_colors != 0) {
+    if (check()) {
+      std::cout << "Duplicated call of try_coloring()?" << std::endl;
+    } else {
+      std::cout << "Check() failed. Something is wrong. :(" << std::endl;
+    }
+    return;
+  }
   int v = -1;
+  int* valid_colors = new int[v_colors.size()];
   while ((v = get_next_v()) != -1) {
+/*
     std::cout << "trying to color vertex : " << v
-              << "    curr_colors : " << curr_colors << std::endl;
-    for (int i = 0; i < curr_colors; i++) {
+              << "    current num_of_colors : " << _num_of_colors << std::endl;
+*/
+    for (int i = 0; i < _num_of_colors; i++) {
       valid_colors[i] = 0;
     }
-    for (std::shared_ptr<HyperEdge> edge : _adjacent_edges[v]) {
-      //std::cout << "checking edge : ";
-      //edge->dump();
-      //std::cout << std::endl;
-      for (int c = 0; c < curr_colors; c++) {
-        //std::cout << "checking color : " << c;
-        if (valid_colors[c] == 0) {
-          // first check if color v as c will cause conflict;
-          if (!check_conflict(edge, v, c)) {
+    for (int c = 0; c < _num_of_colors; c++) {
+      //std::cout << "checking color : " << c;
+      _alternative_edge_set.clear();
+      for (std::shared_ptr<HyperEdge> edge : _adjacent_edges[v]) {
+        //std::cout << "checking edge : ";
+        //edge->dump();
+        //std::cout << std::endl;
+        // first check if color v as c will cause conflict;
+        if (!check_conflict(edge, v, c)) {
+          valid_colors[c] = -1;
+          //std::cout << " invalid" << std::endl;
+          break;
+        }
+        if (_unrecovered_edges.find(edge) != _unrecovered_edges.end()) {
+          // edge is still unrecoverable, check if it's recoverable under v#c
+          if (!check_recoverable(edge, v, c)) {
             valid_colors[c] = -1;
             //std::cout << " invalid" << std::endl;
-            continue;
-          }
-          if (_unrecovered_edges.find(edge) != _unrecovered_edges.end()) {
-            // edge is still unrecoverable, check if it's recoverable under v#c
-            if (!check_recoverable(edge, v, c)) {
-              valid_colors[c] = -1;
-              //std::cout << " invalid" << std::endl;
-            }
+            break;
           }
         }
       }
+      if (valid_colors[c] != -1) {
+        break;
+      }
     }
     int c = 0;
-    // c will be a valid color or curr_colors if none is valid
-    while (c < curr_colors && valid_colors[c] == -1) {c++;}
-    if (c == curr_colors) { curr_colors++;}
+    // c will be a valid color or curr #colors if none is valid
+    while (c < _num_of_colors && valid_colors[c] == -1) {c++;}
+    if (c == _num_of_colors) { _num_of_colors++;}
     // v has color c;
-    std::cout << "vertex " << v << " have color " << c << std::endl;
+//    std::cout << "vertex " << v << " have color " << c << std::endl;
     v_colors[v] = c;
     // update unrecovered/recovered edges AND compressed/recover index set
     for (std::shared_ptr<HyperEdge> edge : _adjacent_edges[v]) {
@@ -97,8 +109,11 @@ bool HyperSymmetricPartition::check_conflict(
   std::map<MultiIndexSet, std::shared_ptr<HyperEdge>>::iterator f_iter = 
       _recover_index_set[c].find(e_index_set);
   if (f_iter != _recover_index_set[c].end()) {
+/*
     return try_another_recover_v(f_iter->second,
                                  _recovery_index[f_iter->second]);
+*/
+    return false;
   }
   //std::cout << "TRUE" << std::endl;
   return true;
@@ -106,6 +121,9 @@ bool HyperSymmetricPartition::check_conflict(
 
 bool HyperSymmetricPartition::try_another_recover_v(
     std::shared_ptr<HyperEdge> e, int v) {
+  if (_alternative_edge_set.find(e) != _alternative_edge_set.end()) {
+    return false;
+  }
   if (_alternative_attempts[e] < MAX_ALTERNATIVE_ATTEMPTS) {
     MultiIndexSet e_index_set = e->get_v_index_set();
     for (int i = 0; i < e->get_degree(); i++) {
@@ -123,6 +141,7 @@ bool HyperSymmetricPartition::try_another_recover_v(
           //std::cout << "alter edge : ";
           //e->dump();
           //std::cout << "from " << v << " to " << v_alt << std::endl;
+          _alternative_edge_set.insert(e);
           //this->dump();
           return true;
         }
