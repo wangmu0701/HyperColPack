@@ -10,10 +10,13 @@
 *.out
 *.swp
 *.class
+*.mm
 *~
 .libs
 .deps
 hyper_graph_test
+hyper_random
+test_colpack
 compile
 Makefile
 Makefile.in

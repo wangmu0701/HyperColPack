@@ -109,11 +109,9 @@ bool HyperSymmetricPartition::check_conflict(
   std::map<MultiIndexSet, std::shared_ptr<HyperEdge>>::iterator f_iter = 
       _recover_index_set[c].find(e_index_set);
   if (f_iter != _recover_index_set[c].end()) {
-/*
-    return try_another_recover_v(f_iter->second,
-                                 _recovery_index[f_iter->second]);
-*/
-    return false;
+    return try_another_recover_v(f_iter->second, _recovery_index[f_iter->second]);
+
+//    return false;
   }
   //std::cout << "TRUE" << std::endl;
   return true;

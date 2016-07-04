@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <set>
+#include <fstream>
 
 #include "hyper_graph.hpp"
 #include "hyper_symmetric_partition.hpp"
@@ -61,6 +62,9 @@ HyperGraph get_third_diagonal_graph(int n) {
 int main() {
   //HyperGraph hg = get_third_diagonal_graph(N);
   HyperGraph hg = get_random_hyper_graph();
+  std::ofstream os("test.mm", std::ofstream::out);
+  hg.dump_distance_1_graph(os);
+  os.close();
   HyperSymmetricPartition sp(hg);
   sp.try_coloring();
   //sp.dump();

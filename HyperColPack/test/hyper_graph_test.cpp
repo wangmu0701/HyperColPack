@@ -1,3 +1,4 @@
+#include <fstream>
 #include "hyper_graph.hpp"
 #include "hyper_symmetric_partition.hpp"
 
@@ -64,4 +65,9 @@ int main() {
   sp.try_coloring();
   sp.dump();
   sp.check();
+  //hg.dump_distance_1(std::ofstream("text.out", std::ofstream::out));
+  //hg.dump_distance_1(std::cout);
+  std::ofstream os("test.mm", std::ofstream::out);
+  hg.dump_distance_1_graph(os);
+  os.close();
 }
