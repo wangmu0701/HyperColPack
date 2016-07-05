@@ -17,6 +17,6 @@ int main(int argc, char* argv[]) {
   test_distance_one("NATURAL", argv[1]);
   test_distance_one("LARGEST_FIRST", argv[1]);
   test_distance_one("DYNAMIC_LARGEST_FIRST", argv[1]);
-  //test_distance_one("SMALLEST_LAST", argv[1]);
+  test_distance_one("SMALLEST_LAST", argv[1]);
   return 0;
 }

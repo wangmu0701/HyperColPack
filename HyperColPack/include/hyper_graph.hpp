@@ -63,7 +63,7 @@ class HyperGraph {
     os << "%%MatrixMarket matrix coordinate pattern symmetric" << std::endl;
     os << _n << " " << _n << " " << _distance_1_adjacent_vector.size() << std::endl;
     for (auto v_pair : _distance_1_adjacent_vector) {
-      os << v_pair.first << " " << v_pair.second << std::endl; 
+      os << v_pair.first + 1 << " " << v_pair.second + 1 << std::endl; 
     }
   }
  private:
