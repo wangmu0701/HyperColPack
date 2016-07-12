@@ -12,38 +12,39 @@
 
 namespace HyperColPack {
 
-class HyperSymmetricPartition;
+template <int DEGREE> class HyperSymmetricPartition;
 
+template <int DEGREE>
 class HyperGraph {
  public:
-  HyperGraph() : _n(0), _d(0), _m(0){}
-  HyperGraph(int n , int d) : _n(n), _d(d), _m(0){}
-  std::shared_ptr<HyperEdge> add_edge(const MultiIndexSet& v_index_set) {
-    std::shared_ptr<HyperEdge> edge(new HyperEdge(_m++, v_index_set));
+  HyperGraph() : _n(0),  _m(0){}
+  HyperGraph(int n) : _n(n),  _m(0){}
+  HyperEdge<DEGREE> add_edge(const MultiIndexSet<DEGREE> v_index_set) {
+    HyperEdge<DEGREE> edge(_m++, v_index_set);
     _edge_vec.push_back(edge);
     return edge;
   } 
 
   void dump() const {
     std::cout << "HyperGraph v["<<_n<<"], e["<<_m << "]" << std::endl;
-    for (const std::shared_ptr<HyperEdge>& e : _edge_vec) {
+    for (const HyperEdge<DEGREE>& e : _edge_vec) {
       std::cout << "  ";
-      e->dump();
+      e.dump();
       std::cout << std::endl;
     }
   }
+
   void dump_distance_1_graph(std::ostream& os) const {
-    std::map<MultiIndexSet, std::set<int>> _collapse_index;
+    std::map<MultiIndexSet<DEGREE>, std::set<int>> _collapse_index;
     std::set<std::pair<int, int>> _distance_1_adjacent_set;
     std::vector<std::pair<int, int>> _distance_1_adjacent_vector;
-    for (std::shared_ptr<HyperEdge> edge : _edge_vec) {
-      MultiIndexSet e_index_set = edge->get_v_index_set();
+    for (const HyperEdge<DEGREE>& edge : _edge_vec) {
+      MultiIndexSet<DEGREE-1> r_index_set;
       int d = edge->get_degree();
       for (int i = 0; i < d; i++) {
         int v = edge->get_v_index(i);
-        e_index_set.remove(v);
-        _collapse_index[e_index_set].insert(v);
-        e_index_set.insert(v);
+        r_index_set = edge.get_index_set().remove(v);
+        _collapse_index[r_index_set].insert(v);
       }
     }
     for (auto kv : _collapse_index) {
@@ -69,10 +70,9 @@ class HyperGraph {
  private:
   int _n;
   int _m;
-  int _d;
-  std::vector<std::shared_ptr<HyperEdge>> _edge_vec;
+  std::vector<HyperEdge<DEGREE>> _edge_vec;
 
-  friend class HyperSymmetricPartition;
+  friend class HyperSymmetricPartition<DEGREE>;
 };
 
 } // namespace HyperColPack

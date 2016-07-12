@@ -1,31 +1,39 @@
 #ifndef HYPERCOLPACK_MULTI_INDEX_SET_H_
 #define HYPERCOLPACK_MULTI_INDEX_SET_H_
 
+#include <cassert>
 #include <iostream>
 #include <initializer_list>
+#include <vector>
 
 namespace HyperColPack {
 
+template <int DEGREE>
 class MultiIndexSet {
  public:
-  MultiIndexSet() : _size(0) {}
+  MultiIndexSet() = default;
   MultiIndexSet(const MultiIndexSet&) = default;
   MultiIndexSet& operator = (const MultiIndexSet&) = default;
 
-  MultiIndexSet(std::initializer_list<int> v_list) {
-    _size = v_list.size();
+
+  MultiIndexSet(const std::initializer_list<int>& v_list) {
+    assert(DEGREE == v_list.size());
     int l = 0;
-    for (int v_index : v_list) {
+    for (const int v_index : v_list) {
       _data[l++] = v_index;
     }
   }
-  bool operator < (const MultiIndexSet& rhs) const {
-    if (this->_size < rhs._size) {
-      return true;
-    } else if (this->_size > rhs._size) {
-      return false;
+
+  MultiIndexSet(const std::vector<int>& v_list) {
+    assert(DEGREE == v_list.size());
+    int l = 0;
+    for (const int v_index : v_list) {
+      _data[l++] = v_index;
     }
-    for (int i = 0; i < this->_size; i++) {
+  }
+
+  bool operator < (const MultiIndexSet& rhs) const {
+    for (int i = 0; i < DEGREE; i++) {
       if (this->_data[i] < rhs._data[i]) {
         return true;
       } else if (this->_data[i] > rhs._data[i]) {
@@ -35,41 +43,46 @@ class MultiIndexSet {
     return false;
   }
 
-  MultiIndexSet& insert(int x) {
+  MultiIndexSet<DEGREE+1> insert(int x) {
+    std::vector<int> v_vec;
     int l = 0;
-    while ((l < _size) && (_data[l] < x)) {
+    while ((l < DEGREE) && (_data[l] < x)) {
+      v_vec.push_back(_data[l]);
       l++;
     }
-    for (int i = _size; i >= l+1; i--) {
-      _data[i] = _data[i-1];
+    v_vec.push_back(x);
+    for (;l < DEGREE; l++) {
+      v_vec.push_back(_data[l]);
     }
-    _data[l] = x;
-    _size += 1;
-    return (*this);
+    return MultiIndexSet<DEGREE+1>(v_vec);
   }
 
-  MultiIndexSet& remove(int x) {
+  MultiIndexSet<DEGREE-1> remove(int x) {
+    std::vector<int> v_vec;
     int l = 0;
-    while (l < _size && _data[l] != x) {
+    while (l < DEGREE && _data[l] != x) {
+      v_vec.push_back(_data[l]);
       l++;
     }
-    if (l == _size) {return *this;}
-    for (int i = l; i < _size - 1; i++) {
-      _data[i] = _data[i+1];
+    // skip l, because _data[l] == x
+    for (l++; l < DEGREE; l++) {
+      v_vec.push_back(_data[l]);
     }
-    _size -= 1;
-    return *this;
+    return MultiIndexSet<DEGREE-1>(v_vec);
   }
 
+/*
   MultiIndexSet& remove_location(int l) {
-    for (int i = l; i < _size - 1; i++) {
+    for (int i = l; i < DEGREE - 1; i++) {
       _data[i] = _data[i+1];
     }
-    _size -= 1;
+    DEGREE -= 1;
     return *this;
   } 
+*/
+
   bool contains(int v) const {
-    for (int i = 0; i < _size; i++) {
+    for (int i = 0; i < DEGREE; i++) {
       if (_data[i] == v) {
         return true;
       } else if (_data[i] > v) {
@@ -78,8 +91,9 @@ class MultiIndexSet {
     }
     return false;
   }
+
   int find(int v) const {
-    for (int i = 0; i < _size; i++) {
+    for (int i = 0; i < DEGREE; i++) {
       if (_data[i] == v) {
         return i;
       } else if (_data[i] > v) {
@@ -88,11 +102,12 @@ class MultiIndexSet {
     }
     return -1;
   }
+
   int get(int index) const {
     return _data[index];
   }
-  void clear() {_size = 0;}
-  int size() const {return _size;}
+  void clear() {DEGREE = 0;}
+  int size() const {return DEGREE;}
   int* get_array() {return &(_data[0]);}
 
   void dump() const {
@@ -100,7 +115,7 @@ class MultiIndexSet {
   }
   void dump(bool endline) const {
     std::cout << "Multi-index : { ";
-    for (int i = 0; i < _size; i++) {
+    for (int i = 0; i < DEGREE; i++) {
       std::cout << _data[i] << " ";
     }
     std::cout << "}";
@@ -110,8 +125,7 @@ class MultiIndexSet {
   }
 
  private:
-  int _data[10];
-  int _size;
+  int _data[DEGREE];
 };
 
 } // namespace HyperColPack

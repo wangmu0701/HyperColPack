@@ -5,8 +5,9 @@
 
 namespace HyperColPack {
 
-class HyperGraph;
+template <int DEGREE> class HyperGraph;
 
+template <int DEGREE>
 class HyperEdge {
  public:
   // The default constructor is deleted, so the ONLY way you can construct
@@ -31,10 +32,7 @@ class HyperEdge {
     return ret;
   }
 */
-  int get_degree() const {
-    return _degree;
-  }
-  MultiIndexSet get_v_index_set() {
+  MultiIndexSet<DEGREE> get_v_index_set() {
     return _v_index_set;
   }
 
@@ -82,18 +80,16 @@ class HyperEdge {
 
  private:
   // Private constructor that will be called by HyperGraph.add_edge();
-  HyperEdge(int id, const MultiIndexSet& multi_index) {
+  HyperEdge(int id, const MultiIndexSet<DEGREE>& multi_index) {
     _edge_id = id;
-    _degree = multi_index.size();
     _v_index_set = multi_index;
   }
 
-  // degree and adjacent vertices
+  // adjacent vertices
   int _edge_id;
-  int _degree;
-  MultiIndexSet _v_index_set;
+  MultiIndexSet<DEGREE> _v_index_set;
   
-  friend class HyperGraph;
+  friend class HyperGraph<DEGREE>;
 };
 
 } // namespace HyperColPack

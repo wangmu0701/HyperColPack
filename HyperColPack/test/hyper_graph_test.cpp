@@ -1,4 +1,5 @@
 #include <fstream>
+#include "multi_index_set.hpp"
 #include "hyper_graph.hpp"
 #include "hyper_symmetric_partition.hpp"
 
@@ -6,18 +7,16 @@ using HyperColPack::MultiIndexSet;
 using HyperColPack::HyperGraph;
 using HyperColPack::HyperSymmetricPartition;
 
-void add_edge(HyperGraph& hg, int v1, int v2) {
-  MultiIndexSet mi;
-  mi.insert(v1).insert(v2);
+void add_edge(HyperGraph<2>& hg, int v1, int v2) {
+  MultiIndexSet<2> mi = {v1, v2};
   hg.add_edge(mi);
 }
-void add_edge(HyperGraph& hg, int v1, int v2, int v3) {
-  MultiIndexSet mi;
-  mi.insert(v1).insert(v2).insert(v3);
+void add_edge(HyperGraph<3>& hg, int v1, int v2, int v3) {
+  MultiIndexSet<3> mi = {v1, v2, v3};
   hg.add_edge(mi);
 }
-HyperGraph get_hessian_graph() {
-  HyperGraph hg(10, 2);
+HyperGraph<2> get_hessian_graph() {
+  HyperGraph<2> hg(10);
   add_edge(hg, 0, 0);
   add_edge(hg, 0, 1);
   add_edge(hg, 0, 6);
@@ -44,8 +43,8 @@ HyperGraph get_hessian_graph() {
   return hg;
 }
 
-HyperGraph get_third_diagonal_graph(int n) {
-  HyperGraph hg(n, 3);
+HyperGraph<3> get_third_diagonal_graph(int n) {
+  HyperGraph<3> hg(n);
   for (int i = 0; i < n; i++) {
     add_edge(hg, i, i, i);
     if (i != n-1) {
@@ -58,16 +57,18 @@ HyperGraph get_third_diagonal_graph(int n) {
   }
   return hg;
 }
+
 int main() {
-  //HyperGraph hg = get_hessian_graph();
-  HyperGraph hg = get_third_diagonal_graph(10);
-  HyperSymmetricPartition sp(hg);
+  //HyperGraph<2> hg = get_hessian_graph();
+  HyperGraph<3> hg = get_third_diagonal_graph(10);
+  //HyperSymmetricPartition<2> sp(hg);
+  HyperSymmetricPartition<3> sp(hg);
   sp.try_coloring();
   sp.dump();
   sp.check();
   //hg.dump_distance_1(std::ofstream("text.out", std::ofstream::out));
   //hg.dump_distance_1(std::cout);
-  std::ofstream os("test.mm", std::ofstream::out);
-  hg.dump_distance_1_graph(os);
-  os.close();
+  //std::ofstream os("test.mm", std::ofstream::out);
+  //hg.dump_distance_1_graph(os);
+  //os.close();
 }

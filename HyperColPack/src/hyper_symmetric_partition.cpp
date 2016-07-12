@@ -1,3 +1,4 @@
+/*
 #include "hyper_symmetric_partition.hpp"
 
 namespace HyperColPack {
@@ -30,10 +31,9 @@ void HyperSymmetricPartition::try_coloring() {
   int v = -1;
   int* valid_colors = new int[v_colors.size()];
   while ((v = get_next_v()) != -1) {
-/*
-    std::cout << "trying to color vertex : " << v
-              << "    current num_of_colors : " << _num_of_colors << std::endl;
-*/
+//    std::cout << "trying to color vertex : " << v
+//              << "    current num_of_colors : " << _num_of_colors << std::endl;
+
     for (int i = 0; i < _num_of_colors; i++) {
       valid_colors[i] = 0;
     }
@@ -227,3 +227,4 @@ bool HyperSymmetricPartition::check() const {
 }
 
 } // namespace HyperColPack
+*/
