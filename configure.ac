@@ -2,6 +2,7 @@ AC_INIT(HyperColPack, 1.0, wangmu0701@gmail.com)
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
+CXXFLAGS="-std=c++11 -O3"
 LT_INIT
 AC_PROG_CXX
 
