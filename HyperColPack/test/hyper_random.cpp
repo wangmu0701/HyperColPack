@@ -41,7 +41,7 @@ HyperGraph<3> get_random_hyper_graph() {
       int v1 = rand() % N;
       int v2 = rand() % N;
       int v3 = rand() % N;
-      MultiIndexSet<3> e_index_set = dummy_set.insert(v1).insert(v2).insert(v2);
+      MultiIndexSet<3> e_index_set = dummy_set.insert(v1).insert(v2).insert(v3);
       if (_edge_set.find(e_index_set) == _edge_set.end()) {
         new_edge = true;
         std::cout << "Edge [" << i << "] : ";
